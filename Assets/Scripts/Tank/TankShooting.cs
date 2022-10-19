@@ -21,6 +21,7 @@ namespace Complete
         private float m_CurrentLaunchForce;         // The force that will be given to the shell when the fire button is released.
         private float m_ChargeSpeed;                // How fast the launch force increases, based on the max charge time.
         private bool m_Fired;                       // Whether or not the shell has been launched with this button press.
+        private Rigidbody shotShell;
 
 
         private void OnEnable()
@@ -78,6 +79,8 @@ namespace Complete
                 // ... launch the shell.
                 Fire();
             }
+
+            m_ShootingAudio.Stop();
         }
 
 
@@ -86,6 +89,15 @@ namespace Complete
             // Change the clip to the firing clip and play it.
             m_ShootingAudio.clip = m_FireClip;
             m_ShootingAudio.Play();
+            m_Fired = true;
+            Shot();
+        }
+
+
+        private void Shot()
+        {
+            shotShell = Instantiate(m_Shell, m_FireTransform.position, transform.rotation);
+            shotShell.AddForce(m_FireTransform.forward * m_CurrentLaunchForce, ForceMode.Impulse);
         }
     }
 }

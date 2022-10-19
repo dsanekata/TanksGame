@@ -30,6 +30,7 @@ namespace Complete
             {
                 // ... and find their rigidbody.
                 Rigidbody targetRigidbody = colliders[i].GetComponent<Rigidbody>();
+                TankHealth targetHealth = colliders[i].GetComponent<TankHealth>();
 
                 // If they don't have a rigidbody, go on to the next collider.
                 if (!targetRigidbody)
@@ -37,6 +38,7 @@ namespace Complete
 
                 // Add an explosion force.
                 targetRigidbody.AddExplosionForce(m_ExplosionForce, transform.position, m_ExplosionRadius);
+                targetHealth.TakeDamage(CalculateDamage(targetRigidbody.transform.position));
             }
 
             // Unparent the particles from the shell.
