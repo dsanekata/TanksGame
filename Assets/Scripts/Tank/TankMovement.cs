@@ -118,14 +118,14 @@ namespace Complete
 
         private void Move()
         {
-            float translation = Input.GetAxis(m_MovementAxisName) * m_Speed * Time.deltaTime;
+            float translation = m_MovementInputValue * m_Speed * Time.deltaTime;
             transform.Translate(0, 0, translation);
         }
 
 
         private void Turn()
         {
-            float rotation = Input.GetAxis(m_TurnAxisName) * m_TurnSpeed * Time.deltaTime;
+            float rotation = m_TurnInputValue * m_TurnSpeed * Time.deltaTime;
             transform.Rotate(0, rotation, 0);
         }
     }

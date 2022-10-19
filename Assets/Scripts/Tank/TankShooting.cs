@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Pool;
 
 namespace Complete
 {
@@ -22,6 +23,7 @@ namespace Complete
         private float m_ChargeSpeed;                // How fast the launch force increases, based on the max charge time.
         private bool m_Fired;                       // Whether or not the shell has been launched with this button press.
         private Rigidbody shotShell;
+        private ObjectPool<Rigidbody> shellPool;
 
 
         private void OnEnable()
@@ -39,6 +41,13 @@ namespace Complete
 
             // The rate that the launch force charges up is the range of possible forces by the max charge time.
             m_ChargeSpeed = (m_MaxLaunchForce - m_MinLaunchForce) / m_MaxChargeTime;
+
+            shellPool = new ObjectPool<Rigidbody>(
+                createFunc: () => Instantiate(m_Shell, m_FireTransform.position, transform.rotation),
+                actionOnDestroy: target => Destroy(target),
+                collectionCheck: true,
+                defaultCapacity: 50,
+                maxSize: 100);
         }
 
 
@@ -96,7 +105,7 @@ namespace Complete
 
         private void Shot()
         {
-            shotShell = Instantiate(m_Shell, m_FireTransform.position, transform.rotation);
+            shotShell = shellPool.Get();
             shotShell.AddForce(m_FireTransform.forward * m_CurrentLaunchForce, ForceMode.Impulse);
         }
     }
