@@ -17,6 +17,7 @@ namespace Complete
         public float m_MinLaunchForce = 15f;        // The force given to the shell if the fire button is not held.
         public float m_MaxLaunchForce = 30f;        // The force given to the shell if the fire button is held for the max charge time.
         public float m_MaxChargeTime = 0.75f;       // How long the shell can charge for before it is fired at max force.
+        public GameObject Turret;
 
 
         private string m_FireButton;                // The input axis that is used for launching shells.
@@ -43,8 +44,8 @@ namespace Complete
             m_ChargeSpeed = (m_MaxLaunchForce - m_MinLaunchForce) / m_MaxChargeTime;
 
             shellPool = new ObjectPool<Rigidbody>(
-                createFunc: () => Instantiate(m_Shell, m_FireTransform.position, transform.rotation),
-                actionOnGet: target => SetShellInfo(target, m_FireTransform.position, transform.rotation),
+                createFunc: () => Instantiate(m_Shell, m_FireTransform.position, Turret.transform.rotation),
+                actionOnGet: target => SetShellInfo(target, m_FireTransform.position, Turret.transform.rotation),
                 actionOnRelease: target => InitShell(target),
                 actionOnDestroy: target => Destroy(target),
                 collectionCheck: true,
