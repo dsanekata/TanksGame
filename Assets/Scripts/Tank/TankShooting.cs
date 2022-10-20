@@ -6,6 +6,7 @@ namespace Complete
 {
     public class TankShooting : MonoBehaviour
     {
+        public static TankShooting tankShooting;
         public int m_PlayerNumber = 1;              // Used to identify the different players.
         public Rigidbody m_Shell;                   // Prefab of the shell.
         public Transform m_FireTransform;           // A child of the tank where the shells are spawned.
@@ -22,7 +23,6 @@ namespace Complete
         private float m_CurrentLaunchForce;         // The force that will be given to the shell when the fire button is released.
         private float m_ChargeSpeed;                // How fast the launch force increases, based on the max charge time.
         private bool m_Fired;                       // Whether or not the shell has been launched with this button press.
-        private Rigidbody shotShell;
         private ObjectPool<Rigidbody> shellPool;
 
 
@@ -44,6 +44,8 @@ namespace Complete
 
             shellPool = new ObjectPool<Rigidbody>(
                 createFunc: () => Instantiate(m_Shell, m_FireTransform.position, transform.rotation),
+                actionOnGet: target => SetShellInfo(target, m_FireTransform.position, transform.rotation),
+                actionOnRelease: target => InitShell(target),
                 actionOnDestroy: target => Destroy(target),
                 collectionCheck: true,
                 defaultCapacity: 50,
@@ -105,8 +107,36 @@ namespace Complete
 
         private void Shot()
         {
-            shotShell = shellPool.Get();
+            Rigidbody shotShell = shellPool.Get();
+            ShellExplosion shellExplosion = shotShell.GetComponent<ShellExplosion>();
+            shellExplosion.tankShootingFunc = ShellRelease;
             shotShell.AddForce(m_FireTransform.forward * m_CurrentLaunchForce, ForceMode.Impulse);
+        }
+
+
+        private Rigidbody SetShellInfo(Rigidbody shell, Vector3 position, Quaternion quaternion)
+        {
+            shell.transform.position = position;
+            shell.transform.rotation = quaternion;
+            shell.velocity = new Vector3();
+            shell.gameObject.SetActive(true);
+
+            return shell;
+        }
+
+
+        private Rigidbody InitShell(Rigidbody shell)
+        {
+            shell.transform.position = new Vector3();
+            shell.transform.rotation = Quaternion.identity;
+            shell.gameObject.SetActive(false);
+
+            return shell;
+        }
+
+        public void ShellRelease(Rigidbody shell)
+        {
+            shellPool.Release(shell);
         }
     }
 }
