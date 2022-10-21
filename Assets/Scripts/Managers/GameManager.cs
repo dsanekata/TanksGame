@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -47,6 +48,20 @@ namespace Complete
                     Instantiate(m_TankPrefab, m_Tanks[i].m_SpawnPoint.position, m_Tanks[i].m_SpawnPoint.rotation) as GameObject;
                 m_Tanks[i].m_PlayerNumber = i + 1;
                 m_Tanks[i].Setup();
+            }
+
+
+            for (int i = 0; i < m_Tanks.Length; i++)
+            {
+                List<GameObject> enemyList = new List<GameObject>();
+                for (int j = 0; j < m_Tanks.Length; j++)
+                {
+                    if (j != i)
+                    {
+                        enemyList.Add(m_Tanks[j].m_Instance);
+                    }
+                }
+                m_Tanks[i].m_Instance.GetComponent<TankMovement>().enemyList = enemyList;
             }
         }
 

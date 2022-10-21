@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 namespace Complete
 {
@@ -12,16 +13,24 @@ namespace Complete
         public AudioClip m_EngineDriving;           // Audio to play when the tank is moving.
         public float m_PitchRange = 0.2f;           // The amount by which the pitch of the engine noises can vary.
         public GameObject m_Turret;
+        [HideInInspector]
+        public List<GameObject> enemyList;
+        public Transform spawnPoint;
 
         private string m_MovementAxisName;          // The name of the input axis for moving forward and back.
         private string m_TurnAxisName;              // The name of the input axis for turning.
         private string m_TurretTurnAxisName;
+        private string m_AimButtonName;
         private Rigidbody m_Rigidbody;              // Reference used to move the tank.
         private float m_MovementInputValue;         // The current value of the movement input.
         private float m_TurnInputValue;             // The current value of the turn input.
         private float m_TurretTurnInputValue;
+        private float m_AimInputValue;
         private float m_OriginalPitch;              // The pitch of the audio source at the start of the scene.
         private ParticleSystem[] m_particleSystems; // References to all the particles systems used by the Tanks
+        private GameObject minDistanceEnemy;
+        private float angle;
+        private float m_searchRadius = 30f;
 
         private void Awake()
         {
@@ -38,6 +47,9 @@ namespace Complete
             m_MovementInputValue = 0f;
             m_TurnInputValue = 0f;
             m_TurretTurnInputValue = 0f;
+            m_AimInputValue = 0f;
+
+            angle = 0f;
 
             // We grab all the Particle systems child of that Tank to be able to Stop/Play them on Deactivate/Activate
             // It is needed because we move the Tank when spawning it, and if the Particle System is playing while we do that
@@ -71,6 +83,8 @@ namespace Complete
             m_MovementAxisName = "Vertical" + m_PlayerNumber;
             m_TurnAxisName = "Horizontal" + m_PlayerNumber;
             m_TurretTurnAxisName = "TurretHorizontal" + m_PlayerNumber;
+            m_AimButtonName = "Aim" + m_PlayerNumber;
+            
 
             // Store the original pitch of the audio source.
             m_OriginalPitch = m_MovementAudio.pitch;
@@ -83,7 +97,33 @@ namespace Complete
             m_MovementInputValue = Input.GetAxis(m_MovementAxisName);
             m_TurnInputValue = Input.GetAxis(m_TurnAxisName);
             m_TurretTurnInputValue = Input.GetAxis(m_TurretTurnAxisName);
+            m_AimInputValue = Input.GetAxis(m_AimButtonName);
 
+            for (int i = 0; i < enemyList.Count; i++)
+            {
+                if (Vector3.Distance(transform.position, enemyList[i].transform.position) < m_searchRadius)
+                {
+                    if (minDistanceEnemy == null || Vector3.Distance(transform.position, minDistanceEnemy.transform.position) > Vector3.Distance(transform.position, enemyList[i].transform.position))
+                    {
+                        minDistanceEnemy = enemyList[i];
+                    }
+                }
+                else
+                {
+                    minDistanceEnemy = null;
+                }
+            }
+;
+            if (minDistanceEnemy != null)
+            {
+                var axis = Vector3.Cross(m_Turret.transform.forward, (minDistanceEnemy.transform.position - m_Turret.transform.position));
+                angle = Vector3.Angle(m_Turret.transform.forward, (minDistanceEnemy.transform.position - m_Turret.transform.position)) * (axis.y < 0 ? -1 : 1);
+            }
+
+            if (angle < 0)
+            {
+                m_AimInputValue = -m_AimInputValue;
+            }
             EngineAudio();
         }
 
@@ -122,6 +162,7 @@ namespace Complete
             Move();
             Turn();
             TurretTurn();
+            Aim();
         }
 
 
@@ -142,6 +183,15 @@ namespace Complete
         {
             float rotation = m_TurretTurnInputValue * m_TurnSpeed * Time.deltaTime;
             m_Turret.transform.Rotate(0, rotation, 0);
+        }
+
+        private void Aim()
+        {
+            if (angle != 0)
+            {
+                float rotation = m_AimInputValue * m_TurnSpeed * Time.deltaTime;
+                m_Turret.transform.Rotate(0, rotation, 0);
+            }
         }
     }
 }
