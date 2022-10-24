@@ -18,6 +18,7 @@ namespace Complete
         [HideInInspector] public string m_ColoredPlayerText;    // A string that represents the player with their number colored to match their tank.
         [HideInInspector] public GameObject m_Instance;         // A reference to the instance of the tank when it is created.
         [HideInInspector] public int m_Wins;                    // The number of wins this player has so far.
+        [HideInInspector] public GameObject m_CameraRig;
 
         private TankMovement m_Movement;                        // Reference to tank's movement script, used to disable and enable control.
         private TankShooting m_Shooting;                        // Reference to tank's shooting script, used to disable and enable control.
@@ -29,6 +30,8 @@ namespace Complete
             // Get references to the components.
             m_Movement = m_Instance.GetComponent<TankMovement> ();
             m_Shooting = m_Instance.GetComponent<TankShooting> ();
+            m_Instance.GetComponent<TankCameraController> ().m_CameraRig = m_CameraRig;
+            m_Instance.GetComponent<TankCameraController> ().m_Turret = m_Movement.m_Turret;
             m_CanvasGameObject = m_Instance.GetComponentInChildren<Canvas> ().gameObject;
 
             // Set the player numbers to be consistent across the scripts.

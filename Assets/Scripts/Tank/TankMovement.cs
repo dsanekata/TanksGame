@@ -13,9 +13,8 @@ namespace Complete
         public AudioClip m_EngineDriving;           // Audio to play when the tank is moving.
         public float m_PitchRange = 0.2f;           // The amount by which the pitch of the engine noises can vary.
         public GameObject m_Turret;
-        [HideInInspector]
-        public List<GameObject> enemyList;
-        public Transform spawnPoint;
+        [HideInInspector] public List<GameObject> enemyList;
+        [HideInInspector] public Transform spawnPoint;
 
         private string m_MovementAxisName;          // The name of the input axis for moving forward and back.
         private string m_TurnAxisName;              // The name of the input axis for turning.
