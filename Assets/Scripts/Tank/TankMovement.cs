@@ -19,6 +19,7 @@ namespace Complete
         private string m_MovementAxisName;          // The name of the input axis for moving forward and back.
         private string m_TurnAxisName;              // The name of the input axis for turning.
         private string m_TurretTurnAxisName;
+        private string m_JumpButtonName;
         private string m_AimButtonName;
         private Rigidbody m_Rigidbody;              // Reference used to move the tank.
         private float m_MovementInputValue;         // The current value of the movement input.
@@ -30,6 +31,7 @@ namespace Complete
         private GameObject minDistanceEnemy;
         private float angle;
         private float m_searchRadius = 30f;
+        private bool m_JumpInputFlg;
 
         private void Awake()
         {
@@ -41,6 +43,7 @@ namespace Complete
         {
             // When the tank is turned on, make sure it's not kinematic.
             m_Rigidbody.isKinematic = false;
+            m_JumpInputFlg = false;
 
             // Also reset the input values.
             m_MovementInputValue = 0f;
@@ -82,6 +85,7 @@ namespace Complete
             m_MovementAxisName = "Vertical" + m_PlayerNumber;
             m_TurnAxisName = "Horizontal" + m_PlayerNumber;
             m_TurretTurnAxisName = "TurretHorizontal" + m_PlayerNumber;
+            m_JumpButtonName = "Jump" + m_PlayerNumber;
             m_AimButtonName = "Aim" + m_PlayerNumber;
             
 
@@ -97,6 +101,11 @@ namespace Complete
             m_TurnInputValue = Input.GetAxis(m_TurnAxisName);
             m_TurretTurnInputValue = Input.GetAxis(m_TurretTurnAxisName);
             m_AimInputValue = Input.GetAxis(m_AimButtonName);
+
+            if (Input.GetButtonDown(m_JumpButtonName))
+            {
+                m_JumpInputFlg = true;
+            }
 
             for (int i = 0; i < enemyList.Count; i++)
             {
@@ -159,6 +168,7 @@ namespace Complete
         {
             // Adjust the rigidbodies position and orientation in FixedUpdate.
             Move();
+            Jump();
             Turn();
             TurretTurn();
             Aim();
@@ -167,7 +177,9 @@ namespace Complete
 
         private void Move()
         {
-            m_Rigidbody.velocity = transform.forward * m_MovementInputValue * m_Speed * Time.deltaTime;
+            Vector3 vec = transform.forward * m_MovementInputValue * m_Speed * Time.deltaTime;
+            vec.y = m_Rigidbody.velocity.y;
+            m_Rigidbody.velocity = vec;
         }
 
 
@@ -181,6 +193,15 @@ namespace Complete
         {
             float rotation = m_TurretTurnInputValue * m_TurnSpeed * Time.deltaTime;
             m_Turret.transform.Rotate(0, rotation, 0);
+        }
+
+        private void Jump()
+        {
+            if (m_JumpInputFlg)
+            {
+                m_Rigidbody.velocity += new Vector3(0, 10, 0);
+                m_JumpInputFlg = false;
+            }
         }
 
         private void Aim()
